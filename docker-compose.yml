@@ -1,0 +1,44 @@
+version: '2'
+services:
+ mydatabase:
+  build:
+   context: .
+   dockerfile: dbDockerFile
+  image: mydatabase:latest
+  ports:
+  - "3306"
+  container_name: mydatabase
+  environment:
+  - "MYSQL_ROOT_PASSWORD=1234"
+  - "MYSQL_DATABASE=my_presta_database"
+  restart: always
+ presta:
+  build:
+   context: .
+   dockerfile: prestaDockerFile
+  image: presta:latest
+  ports:
+  - "8888:80"
+  container_name: presta
+  links:
+  - "mydatabase"
+  volumes:
+  - "./website:/var/www/html"
+  environment:
+  - "DB_SERVER=mydatabase"
+  - "DB_USER=root"
+  - "DB_PASSWD=1234"
+  - "DB_NAME=my_presta_database"
+  restart: always
+ springboot:
+  build:
+   context: .
+   dockerfile: springDockerFile
+  image: springboot:latest
+  ports:
+  - "8987:8080"
+  container_name: springboot
+  links:
+  - "presta"
+  - "mydatabase"
+  restart: always
